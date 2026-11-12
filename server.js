@@ -1,11 +1,10 @@
+
 const express = require("express");
 const helmet = require("helmet");
 const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "llama3.2";
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: "20kb" }));
@@ -14,34 +13,67 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/api/chat", async (req, res) => {
   try {
     const message = String(req.body.message || "").trim();
-    if (!message) return res.status(400).json({ error: "Escribí un mensaje." });
-    if (message.length > 4000) return res.status(413).json({ error: "El mensaje es demasiado largo." });
 
-    const response = await fetch(`${OLLAMA_URL}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: OLLAMA_MODEL,
-        messages: [{ role: "user", content: message }],
-        stream: false
-      })
-    });
+    if (!message) {
+      return res.status(400).json({ error: "Escribí un mensaje." });
+    }
 
-    if (!response.ok) {
-      return res.status(502).json({
-        error: "No pude conectar con Ollama. Comprobá que esté instalado y funcionando en esta computadora."
+    if (message.length > 4000) {
+      return res.status(413).json({ error: "El mensaje es demasiado largo." });
+    }
+
+    if (!process.env.GROQ_API_KEY) {
+      return res.status(500).json({
+        error: "Falta configurar la clave de Groq en Render."
       });
     }
 
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: "Sos LOREN AI, un asistente amable que responde en español."
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ]
+        })
+      }
+    );
+
     const data = await response.json();
-    res.json({ reply: data.message?.content || "No recibí una respuesta." });
+
+    if (!response.ok) {
+      console.error("Error de Groq:", data);
+      return res.status(502).json({
+        error: "Groq no pudo responder. Revisá la clave y el servicio."
+      });
+    }
+
+    res.json({
+      reply: data.choices?.[0]?.message?.content || "No recibí una respuesta."
+    });
+
   } catch (error) {
+    console.error(error);
     res.status(502).json({
-      error: "No encuentro la IA local. Instalá Ollama, iniciá un modelo y volvé a probar."
+      error: "No pude conectar con la inteligencia artificial."
     });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`LOREN AI está en http://localhost:${PORT}`);
+  console.log(`LOREN AI está en el puerto ${PORT}`);
 });
+
