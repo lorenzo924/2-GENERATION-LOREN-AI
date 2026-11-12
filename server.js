@@ -18,10 +18,6 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: "Escribí un mensaje." });
     }
 
-    if (message.length > 4000) {
-      return res.status(413).json({ error: "El mensaje es demasiado largo." });
-    }
-
     if (!process.env.GROQ_API_KEY) {
       return res.status(500).json({
         error: "Falta configurar la clave de Groq en Render."
@@ -41,12 +37,9 @@ app.post("/api/chat", async (req, res) => {
           messages: [
             {
               role: "system",
-              content: "Sos LOREN AI, un asistente amable que responde en español."
+              content: "Sos LOREN AI, un asistente inteligente, amable y que siempre habla en español."
             },
-            {
-              role: "user",
-              content: message
-            }
+            { role: "user", content: message }
           ]
         })
       }
@@ -57,7 +50,7 @@ app.post("/api/chat", async (req, res) => {
     if (!response.ok) {
       console.error("Error de Groq:", data);
       return res.status(502).json({
-        error: "Groq no pudo responder. Revisá la clave y el servicio."
+        error: "Groq no pudo responder. Revisá los Logs de Render."
       });
     }
 
@@ -74,6 +67,7 @@ app.post("/api/chat", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`LOREN AI está en el puerto ${PORT}`);
+  console.log(`LOREN AI está funcionando en el puerto ${PORT}`);
 });
+
 
