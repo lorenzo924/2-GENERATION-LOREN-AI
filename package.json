@@ -1,0 +1,13 @@
+{
+  "name": "loren-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LOREN AI - asistente local gratuito",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "helmet": "^8.0.0"
+  }
+}
