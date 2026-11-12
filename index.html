@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LOREN AI</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#10131b;color:#f4f6fb;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:20px}
+    main{width:min(760px,100%);background:#1a2030;border:1px solid #30394e;border-radius:18px;padding:24px;box-shadow:0 15px 50px #0006}
+    h1{margin:0 0 6px;color:#9b8cff}p{color:#b9c2d5}.chat{height:390px;overflow:auto;background:#111725;border-radius:12px;padding:14px;margin:18px 0}
+    .msg{padding:11px 13px;border-radius:12px;margin:9px 0;white-space:pre-wrap;line-height:1.45}.user{background:#34305a;margin-left:12%}.bot{background:#263248;margin-right:12%}
+    form{display:flex;gap:10px}input{flex:1;min-width:0;background:#0e1420;border:1px solid #46516b;color:white;padding:14px;border-radius:10px;font-size:16px}
+    button{border:0;border-radius:10px;background:#7967e8;color:white;padding:0 20px;font-size:16px;cursor:pointer}button:disabled{opacity:.5}
+    small{display:block;margin-top:12px;color:#9ba7bd}
+  </style>
+</head>
+<body>
+<main>
+  <h1>LOREN AI</h1>
+  <p>Tu asistente personal. Funciona con una IA instalada en tu computadora.</p>
+  <div class="chat" id="chat" aria-live="polite"><div class="msg bot">¡Hola! Soy LOREN AI. Escribime algo para comenzar.</div></div>
+  <form id="form"><input id="message" placeholder="Escribí tu mensaje..." autocomplete="off" required><button id="send">Enviar</button></form>
+  <small>La IA se ejecuta localmente con Ollama. No necesitás pagar una API.</small>
+</main>
+<script>
+const form=document.getElementById('form'), input=document.getElementById('message'), chat=document.getElementById('chat'), send=document.getElementById('send');
+function add(text,kind){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;}
+form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;add(message,'user');input.value='';send.disabled=true;send.textContent='...';
+try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Error al responder');add(data.reply,'bot');}
+catch(err){add(err.message,'bot');}finally{send.disabled=false;send.textContent='Enviar';input.focus();}});
+</script>
+</body>
+</html>
