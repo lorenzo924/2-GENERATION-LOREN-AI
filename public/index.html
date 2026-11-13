@@ -21,7 +21,10 @@
   <div class="chat" id="chat" aria-live="polite"><div class="msg bot">¡Hola! Soy LOREN AI. Escribime algo para comenzar.</div></div>
   <form id="form"><input id="message" placeholder="Escribí tu mensaje..." autocomplete="off" required><button id="send">Enviar</button></form>
   <small>La IA se ejecuta localmente con Ollama. No necesitás pagar una API.</small>
-</main>
+<div style="text-align:center;margin-top:20px;padding:15px;border-top:1px solid #30394e;color:#9ba7bd">
+  <h3>👑 Propietario: Lorenzo Hierro</h3>
+  <p>🤖 Desarrollado con la colaboración de ChatGPT – OpenAI</p>
+</div></main>
 <script>
 const form=document.getElementById('form'), input=document.getElementById('message'), chat=document.getElementById('chat'), send=document.getElementById('send');
 function add(text,kind){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;}
