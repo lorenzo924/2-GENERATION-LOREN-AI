@@ -6,6 +6,10 @@
   "description": "LOREN AI 2.0 - Aplicación de escritorio",
   "main": "desktop/main.js",
   "scripts": {
+  "start": "node server.js",
+  "desktop": "electron .",
+  "dist": "electron-builder --win portable"
+},
     "start": "electron .",
     "server": "node server.js",
     "dist": "electron-builder --win portable"
