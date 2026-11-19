@@ -1,4 +1,6 @@
 
+
+
 const express = require("express");
 const helmet = require("helmet");
 const path = require("path");
@@ -13,8 +15,11 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/api/chat", async (req, res) => {
   try {
     const message = String(req.body.message || "").trim();
-const memory = String(req.body.memory || "");
-const history = Array.isArray(req.body.history) ? req.body.history : [];
+    const memory = String(req.body.memory || "");
+    const history = Array.isArray(req.body.history)
+      ? req.body.history
+      : [];
+
     if (!message) {
       return res.status(400).json({ error: "Escribí un mensaje." });
     }
@@ -24,6 +29,30 @@ const history = Array.isArray(req.body.history) ? req.body.history : [];
         error: "Falta configurar la clave de Groq en Render."
       });
     }
+
+    const safeHistory = history
+      .filter(item =>
+        item &&
+        (item.role === "user" || item.role === "assistant") &&
+        typeof item.content === "string"
+      )
+      .slice(-12);
+
+    const messages = [
+      {
+        role: "system",
+        content: `Sos LOREN AI, un asistente inteligente, amable y que siempre habla en español.
+
+RECUERDOS IMPORTANTES:
+${memory || "Todavía no hay recuerdos guardados."}
+
+Usá los recuerdos para personalizar tus respuestas.
+Respetá cómo el usuario quiere que lo llamen.
+No inventes recuerdos y nunca digas que recordás algo que no aparece aquí.`
+      },
+      ...safeHistory,
+      { role: "user", content: message }
+    ];
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -35,13 +64,7 @@ const history = Array.isArray(req.body.history) ? req.body.history : [];
         },
         body: JSON.stringify({
           model: "openai/gpt-oss-120b",
-          messages: [
-            {
-              role: "system",
-              content: "Sos LOREN AI, un asistente inteligente, amable y que siempre habla en español."
-            },
-            { role: "user", content: message }
-          ]
+          messages
         })
       }
     );
@@ -70,5 +93,3 @@ const history = Array.isArray(req.body.history) ? req.body.history : [];
 app.listen(PORT, () => {
   console.log(`LOREN AI está funcionando en el puerto ${PORT}`);
 });
-
-
