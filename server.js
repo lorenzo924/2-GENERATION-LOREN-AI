@@ -13,7 +13,8 @@ app.use(express.static(path.join(__dirname, "public")));
 app.post("/api/chat", async (req, res) => {
   try {
     const message = String(req.body.message || "").trim();
-
+const memory = String(req.body.memory || "");
+const history = Array.isArray(req.body.history) ? req.body.history : [];
     if (!message) {
       return res.status(400).json({ error: "Escribí un mensaje." });
     }
