@@ -174,7 +174,67 @@ function detectMemory(message) {
     }
   }
 }
-function addMessage(text, kind, save = true) {
+const TASK_KEY = "loren_ai_tareas_v1";
+const taskForm = document.getElementById("taskForm");
+const taskInput = document.getElementById("taskInput");
+const taskList = document.getElementById("taskList");
+
+let tasks = load(TASK_KEY);
+
+function saveTasks() {
+  localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+}
+
+function showTasks() {
+  taskList.innerHTML = "";
+
+  if (!tasks.length) {
+    taskList.textContent = "¡No hay tareas pendientes!";
+    return;
+  }
+
+  tasks.forEach((task, index) => {
+    const item = document.createElement("div");
+    item.className = "memory-item";
+
+    const label = document.createElement("span");
+    label.textContent = task.text;
+    if (task.done) label.style.textDecoration = "line-through";
+
+    const finish = document.createElement("button");
+    finish.textContent = task.done ? "↩️" : "✅";
+    finish.addEventListener("click", () => {
+      tasks[index].done = !tasks[index].done;
+      saveTasks();
+      showTasks();
+    });
+
+    const remove = document.createElement("button");
+    remove.textContent = "🗑️";
+    remove.addEventListener("click", () => {
+      tasks.splice(index, 1);
+      saveTasks();
+      showTasks();
+    });
+
+    item.append(label, finish, remove);
+    taskList.appendChild(item);
+  });
+}
+
+taskForm.addEventListener("submit", event => {
+  event.preventDefault();
+
+  const text = taskInput.value.trim();
+  if (!text) return;
+
+  tasks.push({ text, done: false });
+  saveTasks();
+  showTasks();
+  taskInput.value = "";
+});
+
+showTasks();function addMessage(text, kind, save = true) {
   const el = document.createElement("div");
   el.className = "msg " + kind;
   el.textContent = text;
