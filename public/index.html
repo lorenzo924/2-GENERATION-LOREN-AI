@@ -268,7 +268,79 @@ if (!history.length) {
 
 showMemories();
 
-form.addEventListener("submit", async event => {
+const pdfFile = document.getElementById("pdfFile");
+const readPDF = document.getElementById("readPDF");
+const pdfStatus = document.getElementById("pdfStatus");
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+readPDF.addEventListener("click", async () => {
+  const file = pdfFile.files[0];
+
+  if (!file) {
+    pdfStatus.textContent = "Primero elegí un PDF.";
+    return;
+  }
+
+  try {
+    readPDF.disabled = true;
+    pdfStatus.textContent = "📖 Leyendo el PDF...";
+
+    const buffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({
+      data: buffer
+    }).promise;
+
+    let content = "";
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const data = await page.getTextContent();
+
+      content += data.items.map(item => item.str).join(" ") + "\n";
+    }
+
+    if (!content.trim()) {
+      throw new Error("No encontré texto en ese PDF.");
+    }
+
+    const message =
+      "Leé este PDF y ayudame a entenderlo. " +
+      "Respondé en español:\n\n" +
+      content.slice(0, 12000);
+
+    const previousHistory = history.slice(-12);
+
+    addMessage("📄 Estoy leyendo el PDF: " + file.name, "user");
+
+    pdfStatus.textContent = "🤖 LOREN AI está analizando el documento...";
+
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        message,
+        history: previousHistory,
+        memory: memories.join("\n")
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "No pude analizar el PDF.");
+    }
+
+    addMessage(result.reply, "bot");
+    pdfStatus.textContent = "✅ ¡PDF leído correctamente!";
+
+  } catch (error) {
+    pdfStatus.textContent = "❌ " + error.message;
+  } finally {
+    readPDF.disabled = false;
+  }
+});form.addEventListener("submit", async event => {
   event.preventDefault();
 
   const message = input.value.trim();
