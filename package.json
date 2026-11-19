@@ -1,16 +1,14 @@
 
+
 {
   "name": "loren-ai",
   "version": "2.0.0",
   "private": true,
-  "description": "LOREN AI 2.0 - Aplicación de escritorio",
+  "description": "LOREN AI 2.0 - Asistente inteligente",
   "main": "desktop/main.js",
   "scripts": {
-  "start": "node server.js",
-  "desktop": "electron .",
-  "dist": "electron-builder --win portable"
-},
-    "start": "electron .",
+    "start": "node server.js",
+    "desktop": "electron .",
     "server": "node server.js",
     "dist": "electron-builder --win portable"
   },
