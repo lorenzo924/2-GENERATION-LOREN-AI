@@ -24,14 +24,152 @@
     .memory-item{padding:8px;margin:6px 0;background:#263248;border-radius:8px;display:flex;justify-content:space-between;gap:8px}
     .memory-item button{padding:5px 9px;background:#a34b60}
     .status{color:#9ba7bd;font-size:13px;margin-top:12px}
-  </style>
+/* NUEVO DISEÑO LOREN AI 2.0 */
+body {
+  background: radial-gradient(circle at top, #29105c, #080516 75%);
+  color: #f8f3ff;
+  font-family: Arial, sans-serif;
+}
+
+main {
+  background: linear-gradient(145deg, #17102e, #100b24);
+  border: 2px solid #793cff;
+  border-radius: 22px;
+  box-shadow: 0 0 30px #702aff66;
+}
+
+h1, .panel h3 {
+  color: #bd91ff;
+}
+
+p {
+  color: #d5c8f5;
+}
+
+.chat {
+  background: #0d0920;
+  border: 1px solid #5833a8;
+}
+
+.msg {
+  border: 1px solid #5733a0;
+}
+
+.user {
+  background: #48218a;
+}
+
+.bot {
+  background: #20183e;
+}
+
+input {
+  background: #100b24;
+  border: 1px solid #8755e8;
+  color: white;
+}
+
+button {
+  background: linear-gradient(135deg, #9c42ff, #5720cf);
+  box-shadow: 0 0 12px #873cff44;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px #a45cff99;
+}
+
+.panel {
+  background: #15102d;
+  border: 1px solid #5833a8;
+}
+
+.memory-item {
+  background: #28194c;
+}
+
+.status {
+  color: #c5a7ff;
+} main {
+  position: relative;
+  width: min(1100px, 100%);
+  min-height: 700px;
+  padding-left: 250px;
+}
+
+.sidebar {
+  position: absolute;
+  left: 20px;
+  top: 25px;
+  bottom: 25px;
+  width: 210px;
+  padding: 15px;
+  border-right: 2px solid #5733a0;
+}
+
+.sidebar h2 {
+  color: #c59aff;
+  font-size: 20px;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px;
+  border-radius: 10px;
+  background: #28194c;
+  color: white;
+  text-decoration: none;
+}
+
+.sidebar a:hover {
+  background: #7135ce;
+}
+
+@media (max-width: 650px) {
+  main {
+    padding: 15px;
+  }
+
+  .sidebar {
+    position: static;
+    width: 100%;
+    border-right: 0;
+    border-bottom: 2px solid #5733a0;
+  }
+
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+} </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script></head>
 <body>
-<main>
+<aside class="sidebar">
+  <h2>👑 LOREN AI 2.0</h2>
+  <p>Tu asistente personal 💜</p>
+
+  <nav>
+    <a href="#chat">💬 Nuevo chat</a>
+    <a href="#memories">🧠 Memoria</a>
+    <a href="#tasks">📋 Tareas</a>
+    <a href="#pdf">📄 Archivos y PDF</a>
+    <a href="#images">🖼️ Imágenes</a>
+  </nav>
+
+  <p>⚡ Siempre a tu lado</p>
+</aside><main>
   <h1>LOREN AI 2.0</h1>
   <p>Tu asistente personal inteligente.</p>
 
-  <div class="chat" id="chat" aria-live="polite"></div>
+ <div class="chat" id="chat" aria-live="polite" > </div>
 
   <form id="form">
     <input id="message" placeholder="Escribí tu mensaje..." autocomplete="off" required>
@@ -42,19 +180,19 @@
     <button id="clear">Borrar historial</button>
   </div>
 
-<section class="panel">
+<section class="panel" id="pdf">
   <h3>📄 Leer archivos PDF</h3>
   <input type="file" id="pdfFile" accept=".pdf,application/pdf">
   <button id="readPDF" type="button">Leer PDF</button>
   <p id="pdfStatus">Elegí un archivo PDF.</p>
-</section> <section class="panel">
+</section> <section class="panel" id="tasks">
   <h3>📋 Tareas pendientes</h3>
   <form id="taskForm">
     <input id="taskInput" placeholder="Escribí una tarea..." required>
     <button type="submit">Agregar</button>
   </form>
   <div id="taskList"></div>
-</section> <section class="panel">
+</section> <section class="panel" id="memories">
     <h3>🧠 Recuerdos de LOREN AI</h3>
     <div id="memories"></div>
     <button id="clearMemory">Borrar recuerdos</button>
