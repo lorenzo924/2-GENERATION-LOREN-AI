@@ -42,7 +42,14 @@
     <button id="clear">Borrar historial</button>
   </div>
 
-  <section class="panel">
+ <section class="panel">
+  <h3>📋 Tareas pendientes</h3>
+  <form id="taskForm">
+    <input id="taskInput" placeholder="Escribí una tarea..." required>
+    <button type="submit">Agregar</button>
+  </form>
+  <div id="taskList"></div>
+</section> <section class="panel">
     <h3>🧠 Recuerdos de LOREN AI</h3>
     <div id="memories"></div>
     <button id="clearMemory">Borrar recuerdos</button>
