@@ -3,34 +3,256 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LOREN AI</title>
+  <title>LOREN AI 2.0</title>
   <style>
-    *{box-sizing:border-box}body{margin:0;background:#10131b;color:#f4f6fb;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:20px}
-    main{width:min(760px,100%);background:#1a2030;border:1px solid #30394e;border-radius:18px;padding:24px;box-shadow:0 15px 50px #0006}
-    h1{margin:0 0 6px;color:#9b8cff}p{color:#b9c2d5}.chat{height:390px;overflow:auto;background:#111725;border-radius:12px;padding:14px;margin:18px 0}
-    .msg{padding:11px 13px;border-radius:12px;margin:9px 0;white-space:pre-wrap;line-height:1.45}.user{background:#34305a;margin-left:12%}.bot{background:#263248;margin-right:12%}
-    form{display:flex;gap:10px}input{flex:1;min-width:0;background:#0e1420;border:1px solid #46516b;color:white;padding:14px;border-radius:10px;font-size:16px}
-    button{border:0;border-radius:10px;background:#7967e8;color:white;padding:0 20px;font-size:16px;cursor:pointer}button:disabled{opacity:.5}
-    small{display:block;margin-top:12px;color:#9ba7bd}
+    *{box-sizing:border-box}
+    body{margin:0;background:#10131b;color:#f4f6fb;font-family:Arial,sans-serif;display:grid;place-items:center;min-height:100vh;padding:20px}
+    main{width:min(760px,100%);background:#1a2030;border:1px solid #30394e;border-radius:18px;padding:24px}
+    h1{margin:0;color:#9b8cff}
+    p{color:#b9c2d5}
+    .chat{height:350px;overflow:auto;background:#111725;border-radius:12px;padding:14px;margin:18px 0}
+    .msg{padding:11px 13px;border-radius:12px;margin:9px 0;white-space:pre-wrap;line-height:1.45}
+    .user{background:#34305a;margin-left:12%}
+    .bot{background:#263248;margin-right:12%}
+    form{display:flex;gap:10px}
+    input{flex:1;min-width:0;background:#0e1420;border:1px solid #46516b;color:white;padding:14px;border-radius:10px;font-size:16px}
+    button{border:0;border-radius:10px;background:#7967e8;color:white;padding:12px 18px;font-size:15px;cursor:pointer}
+    button:disabled{opacity:.5}
+    .tools{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .panel{background:#111725;border-radius:12px;padding:14px;margin-top:18px}
+    .panel h3{margin-top:0;color:#9b8cff}
+    .memory-item{padding:8px;margin:6px 0;background:#263248;border-radius:8px;display:flex;justify-content:space-between;gap:8px}
+    .memory-item button{padding:5px 9px;background:#a34b60}
+    .status{color:#9ba7bd;font-size:13px;margin-top:12px}
   </style>
 </head>
 <body>
 <main>
-  <h1>LOREN AI</h1>
-  <p>Tu asistente personal. Funciona con una IA instalada en tu computadora.</p>
-  <div class="chat" id="chat" aria-live="polite"><div class="msg bot">¡Hola! Soy LOREN AI. Escribime algo para comenzar.</div></div>
-  <form id="form"><input id="message" placeholder="Escribí tu mensaje..." autocomplete="off" required><button id="send">Enviar</button></form>
-  <small>La IA se ejecuta localmente con Ollama. No necesitás pagar una API.</small>
-<div style="text-align:center;margin-top:20px;padding:15px;border-top:1px solid #30394e;color:#9ba7bd">
-  <h3>👑 Propietario: Lorenzo Hierro</h3>
-  <p>🤖 Desarrollado con la colaboración de ChatGPT – OpenAI</p>
-</div></main>
+  <h1>LOREN AI 2.0</h1>
+  <p>Tu asistente personal inteligente.</p>
+
+  <div class="chat" id="chat" aria-live="polite"></div>
+
+  <form id="form">
+    <input id="message" placeholder="Escribí tu mensaje..." autocomplete="off" required>
+    <button id="send">Enviar</button>
+  </form>
+
+  <div class="tools">
+    <button id="clear">Borrar historial</button>
+  </div>
+
+  <section class="panel">
+    <h3>🧠 Recuerdos de LOREN AI</h3>
+    <div id="memories"></div>
+    <button id="clearMemory">Borrar recuerdos</button>
+  </section>
+
+  <div class="status" id="status">Memoria local preparada.</div>
+
+  <div style="text-align:center;margin-top:20px;padding:15px;border-top:1px solid #30394e;color:#9ba7bd">
+    <h3>👑 Propietario: Lorenzo Hierro</h3>
+    <p>&#129302; LOREN AI 2.0</p>
+  </div>
+</main>
+
 <script>
-const form=document.getElementById('form'), input=document.getElementById('message'), chat=document.getElementById('chat'), send=document.getElementById('send');
-function add(text,kind){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;chat.appendChild(el);chat.scrollTop=chat.scrollHeight;}
-form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message)return;add(message,'user');input.value='';send.disabled=true;send.textContent='...';
-try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});const data=await r.json();if(!r.ok)throw new Error(data.error||'Error al responder');add(data.reply,'bot');}
-catch(err){add(err.message,'bot');}finally{send.disabled=false;send.textContent='Enviar';input.focus();}});
+const form = document.getElementById("form");
+const input = document.getElementById("message");
+const chat = document.getElementById("chat");
+const send = document.getElementById("send");
+const status = document.getElementById("status");
+const memoriesBox = document.getElementById("memories");
+
+const HISTORY_KEY = "loren_ai_historial_v1";
+const MEMORY_KEY = "loren_ai_memoria_v1";
+
+function load(key) {
+  try {
+    const data = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+let history = load(HISTORY_KEY);
+let memories = load(MEMORY_KEY);
+
+function saveHistory() {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+function saveMemories() {
+  localStorage.setItem(MEMORY_KEY, JSON.stringify(memories));
+  showMemories();
+}
+
+function showMemories() {
+  memoriesBox.innerHTML = "";
+
+  if (!memories.length) {
+    memoriesBox.textContent = "Todavía no hay recuerdos guardados.";
+    return;
+  }
+
+  memories.forEach((memory, index) => {
+    const item = document.createElement("div");
+    item.className = "memory-item";
+
+    const label = document.createElement("span");
+    label.textContent = memory;
+
+    const remove = document.createElement("button");
+    remove.textContent = "X";
+    remove.addEventListener("click", () => {
+      memories.splice(index, 1);
+      saveMemories();
+    });
+
+    item.append(label, remove);
+    memoriesBox.appendChild(item);
+  });
+}
+function detectMemory(message) {
+  const text = message.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // Guardar directamente cuando Lorenzo lo pide.
+  const command = text.match(
+    /^(?:recorda que|recuerda que|recorda|recuerda|guarda que|guarda)\s+(.+)$/i
+  );
+
+  if (command) {
+    const memory = command[1].trim();
+
+    if (memory && !memories.includes(memory) && memories.length < 50) {
+      memories.push(memory);
+      saveMemories();
+      status.textContent = "🧠 ¡Recuerdo guardado!";
+      return;
+    }
+
+    status.textContent = "Ese recuerdo ya existe o la memoria está llena.";
+    return;
+  }
+
+  // Detectar posibles datos importantes y pedir permiso.
+  const patterns = [
+    /mi nombre es .+/i,
+    /mi color favorito es .+/i,
+    /mi comida favorita es .+/i,
+    /mi mascota se llama .+/i,
+    /mi proyecto es .+/i,
+    /mi proyecto se llama .+/i,
+    /mi objetivo es .+/i,
+    /estoy aprendiendo .+/i,
+    /me gusta .+/i,
+    /me encantan? .+/i,
+    /prefiero .+/i
+  ];
+
+  if (patterns.some(pattern => pattern.test(text))) {
+    if (!memories.includes(text) && memories.length < 50) {
+      const answer = confirm(
+        "🧠 Esto podría ser importante.\n\n¿Querés que LOREN AI lo recuerde?\n\n" + text
+      );
+
+      if (answer) {
+        memories.push(text);
+        saveMemories();
+        status.textContent = "🧠 ¡Recuerdo guardado!";
+      } else {
+        status.textContent = "No se guardó ningún recuerdo.";
+      }
+    }
+  }
+}
+function addMessage(text, kind, save = true) {
+  const el = document.createElement("div");
+  el.className = "msg " + kind;
+  el.textContent = text;
+  chat.appendChild(el);
+  chat.scrollTop = chat.scrollHeight;
+
+  if (save) {
+    history.push({
+      role: kind === "user" ? "user" : "assistant",
+      content: text
+    });
+    saveHistory();
+  }
+}
+
+history.forEach(item => {
+  const el = document.createElement("div");
+  el.className = "msg " + (item.role === "user" ? "user" : "bot");
+  el.textContent = item.content;
+  chat.appendChild(el);
+});
+
+if (!history.length) {
+  addMessage("¡Hola! Soy LOREN AI. Estoy listo para conversar.", "bot");
+}
+
+showMemories();
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const message = input.value.trim();
+  if (!message) return;
+
+  const previousHistory = history.slice(-12);
+  detectMemory(message);
+  addMessage(message, "user");
+
+  input.value = "";
+  send.disabled = true;
+  send.textContent = "...";
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        message,
+        history: previousHistory,
+        memory: memories.join("\n")
+      })
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Error al responder.");
+
+    addMessage(data.reply || "No recibí una respuesta.", "bot");
+  } catch (error) {
+    addMessage(error.message, "bot");
+  } finally {
+    send.disabled = false;
+    send.textContent = "Enviar";
+    input.focus();
+  }
+});
+
+document.getElementById("clear").addEventListener("click", () => {
+  if (!confirm("¿Querés borrar todo el historial?")) return;
+  history = [];
+  localStorage.removeItem(HISTORY_KEY);
+  chat.innerHTML = "";
+  addMessage("¡Hola! Empecemos una nueva conversación.", "bot");
+});
+
+document.getElementById("clearMemory").addEventListener("click", () => {
+  if (!confirm("¿Querés borrar todos los recuerdos?")) return;
+  memories = [];
+  saveMemories();
+  status.textContent = "Recuerdos borrados.";
+});
 </script>
 </body>
 </html>
+
+
+
+
+
