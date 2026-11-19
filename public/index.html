@@ -25,7 +25,7 @@
     .memory-item button{padding:5px 9px;background:#a34b60}
     .status{color:#9ba7bd;font-size:13px;margin-top:12px}
   </style>
-</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script></head>
 <body>
 <main>
   <h1>LOREN AI 2.0</h1>
@@ -42,7 +42,12 @@
     <button id="clear">Borrar historial</button>
   </div>
 
- <section class="panel">
+<section class="panel">
+  <h3>📄 Leer archivos PDF</h3>
+  <input type="file" id="pdfFile" accept=".pdf,application/pdf">
+  <button id="readPDF" type="button">Leer PDF</button>
+  <p id="pdfStatus">Elegí un archivo PDF.</p>
+</section> <section class="panel">
   <h3>📋 Tareas pendientes</h3>
   <form id="taskForm">
     <input id="taskInput" placeholder="Escribí una tarea..." required>
